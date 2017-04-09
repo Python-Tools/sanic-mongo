@@ -1,33 +1,36 @@
-# sanic-mongo
+sanic-mongo
+===========
 
 sanic的mongodb异步工具,灵感来源自[官方例子](https://github.com/channelcat/sanic/blob/master/examples/sanic_motor.py).是[motor](https://motor.readthedocs.io/en/stable/tutorial-asyncio.html)的封装,目的只是为了简化操作.
 
+特点 Features
+-------------
 
+-   [motor](https://motor.readthedocs.io/en/stable/tutorial-asyncio.html)
+    支持的操作都支持
+-   支持3.5版本以上的
 
-## 特点 Features
+依赖 Requirements
+-----------------
 
-+ [motor](https://motor.readthedocs.io/en/stable/tutorial-asyncio.html) 支持的操作都支持
-+ 支持3.5版本以上的
+1.  motor&gt;=1.1
+2.  pymongo&gt;=3.4.0
+3.  sanic&gt;=0.4.1
 
-
-## 依赖 Requirements
-
-1. motor>=1.1
-2. pymongo>=3.4.0
-3. sanic>=0.4.1
-
-
-## 安装 Installation
+安装 Installation
+-----------------
 
     pip install sanic-mongo
 
-## 文档 Document
+文档 Document
+-------------
 
 [sanic-mongo](https://sanic-extensions.github.io/sanic-mongo/)
 
-## 例子 Example
+例子 Example
+------------
 
-```python
+``` {.python}
 from sanic import Sanic
 from sanic.response import json
 from sanic_mongo import Mongo
@@ -59,5 +62,4 @@ async def new(request):
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8000)
-
 ```

@@ -11,126 +11,86 @@
 """
 
 
-
 from distutils.core import setup
 
-required = ['aiofiles>=0.3.1',
-            'aiomysql>=0.0.9',
-            'aiopg>=0.13.0',
-            'httptools>=0.0.9',
-            'peewee>=2.9.1',
-            'peewee-async>=0.5.7',
-            'psycopg2>=2.7.1',
-            'PyMySQL>=0.7.10',
-            'sanic>=0.4.1',
-            'ujson>=1.35']
+required = ["1motor>=1.1",
+            "pymongo>=3.4.0",
+            "sanic>=0.4.1"]
 
 
-long_description = '''# sanic-peewee
+long_description = '''# sanic-mongo
 
-    sanic-peewee is a async_peewee orm extension for sanic,
-    I hope users can deal with the database simplely and efectively when using sanic.
-
-
-    ## Features
-
-    + a peewee API similar to peewee's standard, blocking API.
-    + support for async/await (PEP 492) constructs
-    + use database url (peewee's playhose)
-    + support pool and pg's ext (peewee-async)
-    + sync api for creating and delecting tables,async api for GRUD data.
-
-
-    ## Requirements
-
-    1. aiomysql>=0.0.9
-    + aiopg>=0.13.0
-    + peewee>=2.9.1
-    + peewee-async>=0.5.7
-    + psycopg2>=2.7.1
-    + PyMySQL>=0.7.10
-    + sanic>=0.4.1
-
-    ## Installation
-
-        pip install sanic-peewee
+sanic的mongodb异步工具,灵感来源自[官方例子](https://github.com/channelcat/sanic/blob/master/examples/sanic_motor.py).是[motor](https://motor.readthedocs.io/en/stable/tutorial-asyncio.html)的封装,目的只是为了简化操作.
 
 
 
-    ## Example
+## 特点 Features
 
-    ```python
-    from sanic import Sanic
-    from sanic.response import text,json
-    from sanic_peewee import Peewee,select
-    from peewee import CharField, TextField
-
-    app = Sanic(__name__)
-    dburl = "mysql://{user}:{password}@{host}:{port}/{database}".format(
-        database='test1',
-        port=3306,
-        host='127.0.0.1',
-        user='root',
-        password='hsz881224'
-    )
-    peewee = Peewee(dburl)
-    db = peewee(app)
++ [motor](https://motor.readthedocs.io/en/stable/tutorial-asyncio.html) 支持的操作都支持
++ 支持3.5版本以上的
 
 
-    class KeyValue(db.AsyncModel):
-        key = CharField(max_length=40, unique=True)
-        text = TextField(default='')
+## 依赖 Requirements
+
+1. motor>=1.1
+2. pymongo>=3.4.0
+3. sanic>=0.4.1
 
 
+## 安装 Installation
 
-    db.create_tables([KeyValue])
+    pip install sanic-mongo
 
-
-
-    @app.route('/post/<key>/<value>')
-    async def post(request, key, value):
-        """
-        Save get parameters to database
-        """
-        obj = await KeyValue.aio.create(key=key, text=value)# use the model's async object to manage the query
-        return json({'object_id': obj.id})
+## 文档 Document
 
 
-    @app.route('/get')
-    async def get(request):
-        """
-        Load all objects from database
-        """
-        # use the sanic_peewee object's async api
-        all_objects = await db.aio.select(db.SelectQuery(KeyValue))
+## 例子 Example
 
-        serialized_obj = []
-        for obj in all_objects:
-            serialized_obj.append({
-                'id': obj.id,
-                'key': obj.key,
-                'value': obj.text}
-            )
+```python
+from sanic import Sanic
+from sanic.response import json
+from sanic_mongo import Mongo
 
-        return json({'objects': serialized_obj})
+app = Sanic(__name__)
+mongo_uri = "mongodb://{host}:{port}/{database}".format(
+    database='test',
+    port=27017,
+    host='localhost'
+)
+
+mongo = Mongo(mongo_uri)
+db = mongo(app)
+@app.get('/objects')
+async def get(request):
+    docs = await db().test_col.find().to_list(length=100)
+    for doc in docs:
+        doc['id'] = str(doc['_id'])
+        del doc['_id']
+    return json(docs)
 
 
-    @app.route("/")
-    async def test(request):
-        return text('Hello world!')
+@app.post('/objects')
+async def new(request):
+    doc = request.json
+    object_id = await db("test_col").save(doc)
+    return json({'object_id': str(object_id)})
 
-    app.run(host="0.0.0.0", port=8000, debug=True)
-    ```
+
+if __name__ == "__main__":
+    app.run(host='127.0.0.1', port=8000)
+
+```
+
     '''
 setup(
-    name='sanic-peewee',
+    name='sanic-mongo',
     version='1.0.0',
     author='Huang Sizhe',
     author_email='hsz1273327@gmail.com',
-    packages=['sanic_peewee'],
-    license='BSD',
-    description='a simple sanic extension for using async-peewee',
+    packages=['sanic_mongo'],
+    license='Apache License 2.0',
+    description='a simple sanic extension for using motor',
     long_description=long_description,
     install_requires=required,
-    url="https://github.com/Sanic-Extensions/sanic-peewee"
+    url="https://sanic-extensions.github.io/sanic-mongo/"
 )
