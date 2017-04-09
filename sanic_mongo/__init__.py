@@ -3,7 +3,7 @@
 # @Email:  hsz1273327@gmail.com
 # @Last modified by:   huangsizhe
 # @Last modified time: 08-Apr-2017
-# @License: MIT
+# @License: Apache License 2.0
 __all__=["Mongo"]
 
 from sanic_mongo.core import Core

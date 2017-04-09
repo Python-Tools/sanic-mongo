@@ -6,7 +6,7 @@
 @Email:  hsz1273327@gmail.com
 # @Last modified by:   huangsizhe
 # @Last modified time: 08-Apr-2017
-@License: MIT
+@License: Apache License 2.0
 @Description:
 """
 
