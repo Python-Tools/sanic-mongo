@@ -1,13 +1,19 @@
-# @Author: Huang Sizhe
-# @Date:   08-Apr-2017
-# @Email:  hsz1273327@gmail.com
-# @Last modified by:   Huang Sizhe
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+"""
+@Author: Huang Sizhe <huangsizhe>
+@Date:   08-Apr-2017
+@Email:  hsz1273327@gmail.com
+# @Last modified by:   huangsizhe
 # @Last modified time: 08-Apr-2017
-# @License: MIT
+@License: MIT
+@Description:
+"""
+
+__all__=["Core"]
 
 from pymongo.uri_parser import parse_uri
 from motor.motor_asyncio import AsyncIOMotorClient
-from itertools import repeat
 class Core:
     @property
     def uri(self):
@@ -33,13 +39,24 @@ class Core:
         if "extensions" not in app.__dir__():
             app.extensions = {}
         app.extensions['SanicMongo'] = self
-        return self.get_db
+        return self.__get_db(self.uri)
 
-    def get_db(self):
-        def _get_db():
-            database = parse_uri(self.uri).get("database")
-            mongo_uri = "uri"
-            client = AsyncIOMotorClient(mongo_uri)
-            return client[database]
-        a = repeat(_get_db)
-        return next(a)
+    class __get_db:
+        """利用生成器的next方法每次调用都会创建一个新的连接
+        """
+        def __init__(self,uri):
+            def _get_db(collection=None):
+                """返回连接的数据库或者集合
+                """
+                database = parse_uri(uri).get("database")
+                mongo_uri = uri
+                client = AsyncIOMotorClient(mongo_uri,connect=False)
+                if collection:
+                    return client[database][collection]
+                else:
+                    return client[database]
+            self.a = _get_db
+
+        def __call__(self,collection=None):
+            b = self.a
+            return b(collection)
