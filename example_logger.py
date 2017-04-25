@@ -8,7 +8,10 @@
 
 from sanic import Sanic
 from sanic.response import json
-from sanic_mongo import Mongo
+from sanic_mongo import MongoLogger, Mongo
+from sanic.config import Config
+
+Config.REQUEST_TIMEOUT = 3
 
 app = Sanic(__name__)
 mongo_uri = "mongodb://{host}:{port}/{database}".format(
@@ -16,9 +19,11 @@ mongo_uri = "mongodb://{host}:{port}/{database}".format(
     port=27017,
     host='localhost'
 )
-
 mongo = Mongo(mongo_uri)
 mongo(app)
+mongologger = MongoLogger(mongo_uri)
+mongologger(app)
+
 @app.get('/objects')
 async def get(request):
     docs = await mongo.db.test_col.find().to_list(length=100)

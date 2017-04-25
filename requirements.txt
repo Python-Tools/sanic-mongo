@@ -1,3 +1,4 @@
 motor>=1.1
 pymongo>=3.4.0
 sanic>=0.4.1
+user_agents>=1.1.0
