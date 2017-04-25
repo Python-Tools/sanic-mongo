@@ -28,7 +28,7 @@ class Core(Base):
         """
         if not self.uri:
             if app.config.MONGO_URI:
-                self.__uri = app.config.MONGO_URI
+                self.uri = app.config.MONGO_URI
             else:
                 raise AssertionError("need a db url")
 
