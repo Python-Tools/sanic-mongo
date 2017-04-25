@@ -12,20 +12,15 @@
 
 __all__=["Core"]
 
-from pymongo.uri_parser import parse_uri
-from motor.motor_asyncio import AsyncIOMotorClient
-class Core:
-    @property
-    def uri(self):
-        return self.__uri
-    def __call__(self,app):
-        if app:
-            return self.init_app(app)
-        else:
-            raise AttributeError("need a sanic app to init the extension")
+from sanic.log import log
 
+from sanic_mongo.standalone import MongoConnection
+from sanic_mongo.base import Base
+class Core(Base):
+    DBS = {}
     def __init__(self,uri=None):
-        self.__uri = uri
+        super().__init__(uri)
+        self.db = None
 
     def init_app(self, app):
         """绑定app
@@ -36,27 +31,20 @@ class Core:
             else:
                 raise AssertionError("need a db url")
 
+        @app.listener("before_server_start")
+        async def init_mongo_connection(app, loop):
+            mongo = MongoConnection(self.uri,ioloop=loop)
+            Core.DBS[self.uri]=mongo.db
+            setattr(self,"db",mongo.db)
+
+        @app.listener("before_server_stop")
+        async def sub_close(app, loop):
+            log.info("mongo connection {numbr}".format(numbr=len(Core.DBS)))
+            self.db.close
+            log.info("mongo connection closed")
+
+
         if "extensions" not in app.__dir__():
             app.extensions = {}
         app.extensions['SanicMongo'] = self
-        return self.__get_db(self.uri)
-
-    class __get_db:
-        """利用生成器的next方法每次调用都会创建一个新的连接
-        """
-        def __init__(self,uri):
-            def _get_db(collection=None):
-                """返回连接的数据库或者集合
-                """
-                database = parse_uri(uri).get("database")
-                mongo_uri = uri
-                client = AsyncIOMotorClient(mongo_uri,connect=False)
-                if collection:
-                    return client[database][collection]
-                else:
-                    return client[database]
-            self.a = _get_db
-
-        def __call__(self,collection=None):
-            b = self.a
-            return b(collection)
+        return self
