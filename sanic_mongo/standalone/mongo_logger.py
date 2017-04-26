@@ -36,6 +36,8 @@ class MongoLogger:
                  error_options={'size': 104857600, 'capped': False}):
         self.uri = uri
         self.database = parse_uri(self.uri).get("database")
+        if not self.database:
+            raise AttributeError("uri must have a database")
         self.appname = appname
         self.ioloop = ioloop
         self.namespace = Namespace(appname + "-log:")

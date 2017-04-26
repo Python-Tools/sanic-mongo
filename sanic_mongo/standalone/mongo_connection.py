@@ -21,4 +21,6 @@ class MongoConnection:
         client = self.create_client()
         self.client = client
         self.database = parse_uri(self.uri).get("database")
+        if not self.database:
+            raise AttributeError("uri must have a database")
         self.db = self.client[self.database]

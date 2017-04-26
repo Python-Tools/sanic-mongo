@@ -4,13 +4,18 @@
 # @Last modified by:   huangsizhe
 # @Last modified time: 08-Apr-2017
 # @License: Apache License 2.0
-__all__=["Mongo","MongoLogger"]
+__all__=["Mongo","MongoLogger","GridFS"]
 
 from sanic_mongo.mongo import Core as MongoCore
 from sanic_mongo.logger import Core as MongoLoggerCore
+from sanic_mongo.gridfs import Core as GridFSCore
 class Mongo(MongoCore):
     def __init__(self, uri=None):
         super().__init__(uri)
+
+class GridFS(GridFSCore):
+    def __init__(self,uri=None,bucket_name="fs",chunk_size_bytes= 261120,write_concern=None,read_preference=None):
+        super().__init__(uri,bucket_name,chunk_size_bytes,write_concern,read_preference)
 
 class MongoLogger(MongoLoggerCore):
     def __init__(self, uri=None,session_in_cockie='session',
