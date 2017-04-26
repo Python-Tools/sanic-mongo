@@ -13,9 +13,10 @@
 
 from distutils.core import setup
 
-required = ["1motor>=1.1",
+required = ["motor>=1.1",
             "pymongo>=3.4.0",
-            "sanic>=0.4.1"]
+            "sanic>=0.4.1",
+            "user_agents>=1.1.0"]
 
 
 long_description = '''# sanic-mongo
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     '''
 setup(
     name='sanic-mongo',
-    version='1.0.0',
+    version='1.1.0',
     author='Huang Sizhe',
     author_email='hsz1273327@gmail.com',
     packages=['sanic_mongo'],
