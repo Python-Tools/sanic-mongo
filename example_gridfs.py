@@ -7,7 +7,7 @@
 
 
 from sanic import Sanic
-from sanic.response import json
+from sanic.response import json,text
 from sanic_mongo import GridFS
 
 app = Sanic(__name__)
@@ -19,23 +19,22 @@ mongo_uri = "mongodb://{host}:{port}/{database}".format(
 
 fs = GridFS(mongo_uri)
 fs(app)
-@app.get('/objects')
+@app.get('/pics')
 async def get(request):
-    docs = await mongo.db.test_col.find().to_list(length=100)
-    for doc in docs:
-        doc['id'] = str(doc['_id'])
-        del doc['_id']
-    return json(docs)
+    cursor = fs.fs.find()
+    result = [{i._id:i.name} async for i in cursor]
+    return json({"result":result})
 
 
-@app.post('/objects')
+@app.post('/pics')
 async def new(request):
-    doc = request.files
-    async with await fs.fs.new_file() as gridin:
-        await gridin.write(b'First part\n')
-        await gridin.write(b'Second part')
+    doc = request.files.get('file')
 
+    async with fs.fs.open_upload_stream(filename=doc.name,
+        metadata={"contentType": doc.type}) as gridin:
 
+        object_id = gridin._id
+        await gridin.write(doc.body)
 
     return json({'object_id': str(object_id)})
 
