@@ -32,7 +32,7 @@ mongo需要给`app.config`设置关键字`MONGO_URIS`,它是一个由mongodb名�
 同时也可以使用`Mongo.SetConfig(app,**kws)`来注册kws的内容到`MONGO_URIS`.
 而使用的时候可以访问`app.mongo[mongodb名字]`访问对应的db
 
-gridfs与之类似,只是关键字是`GRIDFS_URIS`,而访问需要使用`app.GridFS[GridFS名字]`
+gridfs与之类似,只是关键字是`GRIDFS_SETTINGS`,而访问需要使用`app.GridFS[GridFS名字]`
 
 
 ## 例子 Example

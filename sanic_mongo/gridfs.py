@@ -23,7 +23,7 @@ class Core:
 
     @staticmethod
     def SetConfig(app, **confs):
-        app.config.GRIDFS_URIS = confs
+        app.config.GRIDFS_SETTINGS = confs
         return app
 
     def __init__(self, app):
@@ -36,8 +36,8 @@ class Core:
     def init_app(self, app):
         """绑定app
         """
-        if app.config.GRIDFS_URIS and isinstance(app.config.GRIDFS_URIS, dict):
-            self.GRIDFS_URIS = app.config.GRIDFS_URIS
+        if app.config.GRIDFS_SETTINGS and isinstance(app.config.GRIDFS_SETTINGS, dict):
+            self.GRIDFS_SETTINGS = app.config.GRIDFS_SETTINGS
             self.app = app
 
         else:
@@ -46,7 +46,7 @@ class Core:
 
         @app.listener("before_server_start")
         async def init_mongo_connection(app, loop):
-            for bucket_name, (dburl,collection) in app.config.GRIDFS_URIS.items():
+            for bucket_name, (dburl,collection) in app.config.GRIDFS_SETTINGS.items():
                 bucket = GridFSBucket(dburl,ioloop=loop,collection = collection).bucket
                 self.GridFSs[bucket_name] = bucket
 
