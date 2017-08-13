@@ -85,7 +85,7 @@ if __name__ == "__main__":
     '''
 setup(
     name='sanic-mongo',
-    version='1.1.0',
+    version='1.5.0',
     author='Huang Sizhe',
     author_email='hsz1273327@gmail.com',
     packages=['sanic_mongo'],

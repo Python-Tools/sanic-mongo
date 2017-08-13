@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 """
-@Author: Huang Sizhe <huangsizhe>
-@Date:   08-Apr-2017
-@Email:  hsz1273327@gmail.com
-# @Last modified by:   huangsizhe
-# @Last modified time: 08-Apr-2017
-@License: Apache License 2.0
-@Description:
+gridfs使用的模块,用于存储文件到mongodb,
+需要设置app.config中的GRIDFS_URIS字段,格式为:
+
+{
+Bucket_name:(mongodbURI,collection),
+...
+}
+
+
 """
 
 __all__ = ["Core"]
@@ -15,41 +17,50 @@ __all__ = ["Core"]
 from sanic.log import log
 
 from sanic_mongo.standalone import GridFSBucket
-from sanic_mongo.base import Base
 
 
-class Core(Base):
-    FS = {}
-    def __init__(self, uri=None,collection="fs",chunk_size_bytes= 261120,write_concern=None,read_preference=None):
-        super().__init__(uri)
-        self.collection=collection
+class Core:
 
+    @staticmethod
+    def SetConfig(app, **confs):
+        app.config.GRIDFS_URIS = confs
+        return app
+
+    def __init__(self, app):
+        self.GridFSs = {}
+        if app:
+            self.init_app(app)
+        else:
+            pass
 
     def init_app(self, app):
         """绑定app
         """
-        if not self.uri:
-            if app.config.MONGO_URI:
-                self.uri = app.config.MONGO_URI
-            else:
-                raise AssertionError("need a db url")
+        if app.config.GRIDFS_URIS and isinstance(app.config.GRIDFS_URIS, dict):
+            self.GRIDFS_URIS = app.config.GRIDFS_URIS
+            self.app = app
+
+        else:
+            raise ValueError(
+                "nonstandard sanic config GRIDFS_URIS,GRIDFS_URIS must be a Dict[Bucket_name,Tuple[dburl,collection]]")
 
         @app.listener("before_server_start")
         async def init_mongo_connection(app, loop):
-            fs = GridFSBucket(self.uri, ioloop=loop,collection = self.collection).bucket
-            Core.FS[self.uri+":"+self.collection] = fs
-            self.client = fs.client
-            if hasattr(self,self.collection):
-                loop.close()
-                raise AttributeError("bucket_name has used, choose a new one")
-            setattr(self,self.collection,fs)
+            for bucket_name, (dburl,collection) in app.config.GRIDFS_URIS.items():
+                bucket = GridFSBucket(dburl,ioloop=loop,collection = collection).bucket
+                self.GridFSs[bucket_name] = bucket
 
         @app.listener("before_server_stop")
         async def sub_close(app, loop):
-            self.client.close
-            log.info("{self.collection} connection closed".format(self=self))
+            log.info("mongo connection {numbr}".format(numbr=len(self.GridFSs)))
+            for bucket_name,bucket in self.GridFSs.items():
+                bucket.client.close
+                log.info("{bucket_name} connection closed".format(bucket_name=bucket_name))
+
 
         if "extensions" not in app.__dir__():
             app.extensions = {}
         app.extensions['SanicGridFS'] = self
+
+        app.GridFS = self.GridFSs
         return self

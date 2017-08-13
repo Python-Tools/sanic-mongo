@@ -17,11 +17,12 @@ mongo_uri = "mongodb://{host}:{port}/{database}".format(
     host='localhost'
 )
 
-fs = GridFS(mongo_uri)
-fs(app)
+GridFS.SetConfig(app,test_fs=(mongo_uri,"fs"))
+GridFS(app)
+
 @app.get('/pics')
 async def get(request):
-    cursor = fs.fs.find()
+    cursor = app.GridFS["test_fs"].find()
     result = [{i._id:i.name} async for i in cursor]
     return json({"result":result})
 
@@ -30,7 +31,7 @@ async def get(request):
 async def new(request):
     doc = request.files.get('file')
 
-    async with fs.fs.open_upload_stream(filename=doc.name,
+    async with app.GridFS["test_fs"].open_upload_stream(filename=doc.name,
         metadata={"contentType": doc.type}) as gridin:
 
         object_id = gridin._id

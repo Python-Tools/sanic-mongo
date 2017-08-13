@@ -17,11 +17,12 @@ mongo_uri = "mongodb://{host}:{port}/{database}".format(
     host='localhost'
 )
 
-mongo = Mongo(mongo_uri)
-mongo(app)
+Mongo.SetConfig(app,test=mongo_uri)
+Mongo(app)
+
 @app.get('/objects')
 async def get(request):
-    docs = await mongo.db.test_col.find().to_list(length=100)
+    docs = await app.mongo['test'].test_col.find().to_list(length=100)
     for doc in docs:
         doc['id'] = str(doc['_id'])
         del doc['_id']
@@ -31,7 +32,8 @@ async def get(request):
 @app.post('/objects')
 async def new(request):
     doc = request.json
-    object_id = await mongo.db["test_col"].save(doc)
+    print(type(app.mongo['test']))
+    object_id = await app.mongo['test']["test_col"].save(doc)
     return json({'object_id': str(object_id)})
 
 

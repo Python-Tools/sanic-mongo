@@ -15,38 +15,50 @@ __all__ = ["Core"]
 from sanic.log import log
 
 from sanic_mongo.standalone import MongoConnection
-from sanic_mongo.base import Base
 
 
-class Core(Base):
-    DBS = {}
+class Core:
 
-    def __init__(self, uri=None):
-        super().__init__(uri)
-        self.db = None
+    @staticmethod
+    def SetConfig(app, **confs):
+        app.config.MONGO_URIS = confs
+        return app
+
+    def __init__(self, app=None):
+        self.mongodbs = {}
+        if app:
+            self.init_app(app)
+        else:
+            pass
 
     def init_app(self, app):
         """绑定app
         """
-        if not self.uri:
-            if app.config.MONGO_URI:
-                self.uri = app.config.MONGO_URI
-            else:
-                raise AssertionError("need a db url")
+        if app.config.MONGO_URIS and isinstance(app.config.MONGO_URIS, dict):
+            self.MONGO_URIS = app.config.MONGO_URIS
+            self.app = app
+
+        else:
+            raise ValueError(
+                "nonstandard sanic config MONGO_URIS,MONGO_URIS must be a Dict[dbname,dburl]")
+
 
         @app.listener("before_server_start")
         async def init_mongo_connection(app, loop):
-            mongo = MongoConnection(self.uri, ioloop=loop)
-            Core.DBS[self.uri] = mongo.db
-            self.db = mongo.db
+            for dbname, dburl in app.config.MONGO_URIS.items():
+                db = MongoConnection(dburl,ioloop=loop).db
+                self.mongodbs[dbname] = db
 
         @app.listener("before_server_stop")
         async def sub_close(app, loop):
-            log.info("mongo connection {numbr}".format(numbr=len(Core.DBS)))
-            self.db.client.close
-            log.info("mongo connection closed")
+            log.info("mongo connection {numbr}".format(numbr=len(self.mongodbs)))
+            for dbname,db in self.mongodbs.items():
+                db.client.close
+                log.info("{dbname} connection closed".format(dbname=dbname))
 
         if "extensions" not in app.__dir__():
             app.extensions = {}
         app.extensions['SanicMongo'] = self
+
+        app.mongo = self.mongodbs
         return self

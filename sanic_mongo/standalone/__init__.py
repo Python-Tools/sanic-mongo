@@ -1,5 +1,4 @@
-__all__=["MongoConnection","MongoLogger","GridFSBucket"]
+__all__=["MongoConnection","GridFSBucket"]
 
 from .mongo_connection import MongoConnection
-from .mongo_logger import MongoLogger
 from .mongo_GridFs import GridFSBucket
