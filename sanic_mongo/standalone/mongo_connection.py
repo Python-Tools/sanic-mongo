@@ -10,9 +10,9 @@ class MongoConnection:
         """
         #database = parse_uri(self.uri).get("database")
         if self.ioloop:
-            client = AsyncIOMotorClient(self.uri, io_loop=self.ioloop)
+            client = AsyncIOMotorClient("/".join(self.uri.split("/")[:-1]), io_loop=self.ioloop)
         else:
-            client = AsyncIOMotorClient(self.uri)
+            client = AsyncIOMotorClient("/".join(self.uri.split("/")[:-1]))
         return client
 
     def __init__(self, uri: str, ioloop=None):
