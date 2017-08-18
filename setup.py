@@ -1,15 +1,6 @@
-# -*- coding: utf-8 -*-
-#!/usr/bin/env python
+"""setup.py file
+sanic-mongo
 """
-@Author: Huang Sizhe
-@Date:   06-Apr-2017
-@Email:  hsz1273327@gmail.com
-# @Last modified by:   Huang Sizhe
-# @Last modified time: 08-Apr-2017
-@License: MIT
-@Description:
-"""
-
 from codecs import open
 from setuptools import setup, find_packages
 from os import path
