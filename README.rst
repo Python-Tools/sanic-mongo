@@ -7,7 +7,7 @@ sanic的mongodb异步工具,灵感来源自 `官方例子 <https://github.com/ch
 更新
 -----------------------
 
-* v1.6.1 修正了mongo连接权限可能引发的问题,现在可以配置每个连接是否是只能连database,默认为False.{"uri":xxxx,"only_db":True}
+* v1.7.1 修正了mongo连接权限可能引发的问题,现在可以配置每个连接是否是只能连database,默认为False.{"uri":xxxx,"only_db":True}
 * v1.6.0 修正了验证无法通过的问题
 * v1.5.0 将接口调整至和sanic-aioorm一致.
 
