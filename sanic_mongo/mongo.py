@@ -24,7 +24,7 @@ class Core:
         app.config.MONGO_URIS = confs
         return app
 
-    def __init__(self, app=None):
+    def __init__(self, app=None,):
         self.mongodbs = {}
         if app:
             self.init_app(app)
@@ -46,7 +46,10 @@ class Core:
         @app.listener("before_server_start")
         async def init_mongo_connection(app, loop):
             for dbname, dburl in app.config.MONGO_URIS.items():
-                db = MongoConnection(dburl,ioloop=loop).db
+                if isinstance(dburl,str):
+                    db = MongoConnection(dburl,ioloop=loop).db
+                else:
+                    db = MongoConnection(ioloop=loop,**dburl).db
                 self.mongodbs[dbname] = db
 
         @app.listener("before_server_stop")

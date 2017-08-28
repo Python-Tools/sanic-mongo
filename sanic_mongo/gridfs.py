@@ -47,7 +47,10 @@ class Core:
         @app.listener("before_server_start")
         async def init_mongo_connection(app, loop):
             for bucket_name, (dburl,collection) in app.config.GRIDFS_SETTINGS.items():
-                bucket = GridFSBucket(dburl,ioloop=loop,collection = collection).bucket
+                if isinstance(dburl,str):
+                    bucket = GridFSBucket(dburl,ioloop=loop,collection = collection).bucket
+                else:
+                    bucket = GridFSBucket(ioloop=loop,collection = collection,**dburl).bucket
                 self.GridFSs[bucket_name] = bucket
 
         @app.listener("before_server_stop")
