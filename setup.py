@@ -18,7 +18,7 @@ with open(path.join(HERE, 'README.rst'), encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()
 setup(
     name='sanic-mongo',
-    version='1.6.0',
+    version='1.6.1',
     author='Huang Sizhe',
     author_email='hsz1273327@gmail.com',
     packages=PACKAGES,
