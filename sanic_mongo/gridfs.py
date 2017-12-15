@@ -14,7 +14,7 @@ Bucket_name:(mongodbURI,collection),
 
 __all__ = ["Core"]
 
-from sanic.log import log
+from sanic.log import logger as log
 
 from sanic_mongo.standalone import GridFSBucket
 
